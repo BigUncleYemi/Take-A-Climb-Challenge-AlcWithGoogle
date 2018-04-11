@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Contact X </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+</head>
+
+<body>
+        <!-- header -->
+    <header>
+        <div class="head">
+            <h1>
+                Contact X
+            </h1>
+        </div>
+    </header>
+    <!-- contact view -->
+    <main>
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone No</th>
+                        <th>mobile</th>
+                        <th>email</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="list">
+
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <!-- add contact section -->
+    <div class="fun">
+        <!-- add contact toggle button -->
+        <button id="add" class="button">+</button>
+        <!-- add contact input area  -->
+        <div id="add-contact" class="contactForm">
+            <div class="form-body">
+                <div class="form-header">
+                    <span class="close">x</span>
+                    <h2>
+                        Create New Contact
+                    </h2>
+                </div>
+                <form action="/" name="add" class="form">
+                    <div>
+                        <label for="Full Name">Name</label>
+                        <input type="text" name="fullName" id="fName" placeholder="Name" required/>
+                    </div>
+                    <div>
+                        <label for="Phone No">Phone No</label>
+                        <input type="tel" name="phone" id="phone" placeholder="Phone No" required/>
+                    </div>
+                    <div>
+                        <label for="Mobile no">Mobile No</label>
+                        <input type="tel" name="mobile" id="mobile" placeholder="Mobile" />
+                    </div>
+                    <div>
+                        <label for="Email">Email</label>
+                        <input type="email" name="email" id="email" placeholder="Email" />
+                    </div>
+                    <div>
+                        <label for="Address">Address</label>
+                        <input type="text" name="address" id="address" placeholder="Address" />
+                    </div>
+                    <div>
+                        <label for=Company>Company</label>
+                        <input type="text" name="company" id="company" placeholder="Company" />
+                        <input type="text" name="title" id="title" placeholder="Job Title" />
+                    </div>
+                    <div>
+                        <label for="website">Website</label>
+                        <input type="url" name="website" id="website" placeholder="Website" />
+                    </div>
+                    <input id="done" type="submit" value="Done">
+                    <input type="hidden" name="id_entry" value="0">
+                </form>
+            </div>
+        </div>
+        <!-- view contact area  -->
+        <div id="view-contact" class="contactForm">
+            <div class="form-body">
+                <div name="add">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <center>
+                                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8c7ud6b23uWoh3SPHza3GEMzFLhOQkW8tM0YYTGZ1sbt2pjz7" alt="Favourite 1"
+                                            class="img-size" />
+                                    </center>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="data">
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        <!-- javascript -->
+        <script>
+            // add and view contact modal function
+            var addContact = document.getElementById('add-contact');
+            var view = document.getElementById('view-contact');
+            var add = document.getElementById('add');
+
+            add.onclick = function () {
+                addContact.style.display = 'block';
+            }
+
+            // close button function
+            var close = document.getElementsByClassName('close')[0];
+
+            close.onclick = function () {
+                addContact.style.display = 'none';
+            }
+
+            window.onclick = function (event) {
+                if (event.target == addContact) {
+                    addContact.style.display = 'none';
+                }
+            }
+
+            window.onclick = function (event) {
+                if (event.target == view) {
+                    view.style.display = 'none';
+                }
+            }
+
+            var Contacts = {
+                index: window.localStorage.getItem("Contacts:index"),
+                table: document.getElementById("list"),
+                form: document.forms.add,
+                button_save: document.getElementById("done"),
+                
+                // initizate localstorage
+                init: function () {
+                    if (!Contacts.index) {
+                        window.localStorage.setItem("Contacts:index", Contacts.index = 1);
+                    }
+                    Contacts.form.reset();
+                    
+                    // Submit funtion function
+                    Contacts.form.addEventListener("submit", function (event) {
+                        // get all data 
+                        var entry = {
+                            id: parseInt(this.id_entry.value),
+                            name: this.fullName.value,
+                            phone: this.phone.value,
+                            mobile: this.mobile.value,
+                            email: this.email.value,
+                            address: this.address.value,
+                            company: this.company.value,
+                            title: this.title.value,
+                            website: this.website.value
+                        };
+                        // pass data into function where needed
+                        if (entry.id == 0) {
+                            Contacts.storeAdd(entry);
+                            Contacts.tableAdd(entry);
+                        } else {
+                            Contacts.storeEdit(entry);
+                            Contacts.tableEdit(entry);
+                        }
+                        this.reset();
+                        this.id_entry.value = 0;
+                        event.preventDefault();
+                        document.getElementById('add-contact').style.display = 'none';
+                    }, true);
+                    if (window.localStorage.length - 1) {
+                        var contacts_list = [],
+                            i, key;
+                        for (i = 0; i < window.localStorage.length; i++) {
+                            key = window.localStorage.key(i);
+                            if (/Contacts:\d+/.test(key)) {
+                                contacts_list.push(JSON.parse(window.localStorage.getItem(key)));
+                            }
+                        }
+
+                        if (contacts_list.length) {
+                            contacts_list
+                                .sort(function (a, b) {
+                                    return a.id < b.id ? -1 : (a.id > b.id ? 1 : 0);
+                                })
+                                .forEach(Contacts.tableAdd);
+                        }
+                    }
+
+                    // edit , remove , view contact info function 
+                    Contacts.table.addEventListener("click", function (event) {
+                        var op = event.target.getAttribute("data-op");
+                        if (/edit|remove|view/.test(op)) {
+                            var entry = JSON.parse(window.localStorage.getItem("Contacts:" + event.target
+                                .getAttribute("data-id")));
+                            // edit funtion    
+                            if (op == "edit") {
+                                Contacts.form.fullName.value = entry.name;
+                                Contacts.form.phone.value = entry.phone;
+                                Contacts.form.mobile.value = entry.mobile;
+                                Contacts.form.email.value = entry.email;
+                                Contacts.form.id_entry.value = entry.id;
+                                Contacts.form.address.value = entry.address;
+                                Contacts.form.company.value = entry.company;
+                                Contacts.form.title.value = entry.title;
+                                Contacts.form.website.value = entry.website;
+                                document.getElementById('add-contact').style.display = 'block';
+                                this.reset();
+                            // view function
+                            } else if (op == "view") {
+                                var view = document.getElementById('data')
+                                view.innerHTML = '<tr><td class="label">Name:</td></tr><tr><td>' +
+                                    entry.name +
+                                    '</td></tr><tr><td class="label">Phone No:</td></tr><tr><td>' +
+                                    entry
+                                    .phone +
+                                    '</td></tr><tr><td class="label">Mobile No:</td></tr><tr><td>' +
+                                    entry.mobile +
+                                    '</td></tr><tr><td class="label">Email:</td></tr><tr><td>' + entry.email +
+                                    '</td></tr><tr><td class="label">Address:</td></tr><tr><td>' +
+                                    entry.address +
+                                    '</td></tr><tr><td class="label">Job Title:</td></tr><tr><td>' +
+                                    entry
+                                    .title +
+                                    '</td><tr><td class="label">Company:</td></tr></tr><tr><td>' +
+                                    entry.company +
+                                    '</td></tr><tr><td class="label">Website:</td></tr><tr><td>' +
+                                    entry.website + '</td></tr>';
+                                document.getElementById('view-contact').style.display = 'block';
+                            // remove funtion
+                            } else if (op == "remove") {
+                                if (confirm('Are you sure you want to remove " ' + entry.name +
+                                        '" from your contacts?')) {
+                                    Contacts.storeRemove(entry);
+                                    Contacts.tableRemove(entry);
+                                }
+                            }
+                            event.preventDefault();
+                        }
+                    }, true);
+                },
+                
+                // storing entry into local storage
+                storeAdd: function (entry) {
+                    entry.id = Contacts.index;
+                    window.localStorage.setItem("Contacts:index", ++Contacts.index);
+                    window.localStorage.setItem("Contacts:" + entry.id, JSON.stringify(entry));
+                },
+                // editing entry into local storage
+                storeEdit: function (entry) {
+                    window.localStorage.setItem("Contacts:" + entry.id, JSON.stringify(entry));
+                },
+                // removing entry into local storage
+                storeRemove: function (entry) {
+                    window.localStorage.removeItem("Contacts:" + entry.id);
+                    window.localStorage.setItem("Contacts:index", --Contacts.index);
+                },
+                // inserting data in table
+                tableAdd: function (entry) {
+                    var tr = document.createElement("tr"),
+                        td;
+                    tr.innerHTML = '<td><a data-op="view" data-id="' + entry.id +
+                        '">' + entry.name + '</a></td><td>' + entry.phone + '</td><td>' + entry.mobile +
+                        '</td><td>' + entry.email + '</td>';
+                    td = document.createElement("td");
+                    td.innerHTML = '<button data-op="edit" data-id="' + entry.id +
+                        '">Edit</button> | <button data-op="remove" data-id="' + entry.id + '">Remove</button>';
+                    tr.appendChild(td);
+                    tr.setAttribute("id", "entry-" + entry.id);
+                    Contacts.table.appendChild(tr);
+                },
+                // inserting edited data in table
+                tableEdit: function (entry) {
+                    var tr = document.createElement("tr"),
+                        td;
+                    tr.innerHTML = '<td>' + entry.id + '</td><td><a data-op="view" data-id="' + entry.id +
+                        '">' + entry.name + '</a></td><td>' + entry.phone + '</td><td>' + entry.mobile +
+                        '</td><td>' + entry.email + '</td>';
+                    td = document.createElement("td");
+                    td.innerHTML = '<a data-op="edit" data-id="' + entry.id +
+                        '">Edit</a> | <a data-op="remove" data-id="' + entry.id + '">Remove</a>';
+                    tr.appendChild(td);
+                },
+                // removing data from the table
+                tableRemove: function (entry) {
+                    Contacts.table.removeChild(document.getElementById("entry-" + entry.id));
+                }
+            };
+            // init function 
+            Contacts.init();
+        </script>
+    </div>
+    <footer>
+        <div>
+            <h4>
+                &copy;Contact X
+            </h4>
+            <span>
+                #AlcWithGoogle
+            </span>
+        </div>
+    </footer>
+</body>
+
+</html>
